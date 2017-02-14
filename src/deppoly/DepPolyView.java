@@ -31,17 +31,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class DepPolyView extends FrameView {
     
-    AssetSL assetSL;
-    AssetDDL assetDDL;
-    AssetOHDL assetOHDL;
+//    AssetSL assetSL;
+//    AssetDDL assetDDL;
+//    AssetOHDL assetOHDL;
+    
+    Asset asset;
 
     public DepPolyView(SingleFrameApplication app) {
         super(app);
 
         initComponents();
         tbl_schedule.setName(null);
-        DefaultTableCellRenderer scheduleTablelRenderer = (DefaultTableCellRenderer) tbl_schedule.getDefaultRenderer(Object.class);
-        scheduleTablelRenderer.setHorizontalAlignment(JLabel.RIGHT);
+
         
    // add buttons to radio group
         methodGroup.add(rdo_straightLine);
@@ -439,35 +440,24 @@ public class DepPolyView extends FrameView {
             return;
         }        
         
-        String[][] tableValues; // = new String[asset.getLifeOfItem()][4];
-
         if(rdo_straightLine.isSelected()) {
-            assetSL = new AssetSL(assetName, assetCost, salvageValue, lifeOfItem); 
-        if(!assetSL.getErrorMessage().isEmpty()) {
-            statusMessageLabel.setText(assetSL.getErrorMessage());
-            return;
-        }
-        tableValues = new String[assetSL.getLifeOfItem()][4];
+            asset = new AssetSL(assetName, assetCost, salvageValue, lifeOfItem);
         } 
         else if (rdo_OHDL.isSelected()) {
             // use one-half declining method
-            assetOHDL = new AssetOHDL(assetName, assetCost, salvageValue, lifeOfItem);
-            if(!assetOHDL.getErrorMessage().isEmpty()) {
-                statusMessageLabel.setText(assetOHDL.getErrorMessage());
-                return;
-            } 
-            tableValues = new String[assetOHDL.getLifeOfItem()][4];
+            asset = new AssetOHDL(assetName, assetCost, salvageValue, lifeOfItem);
         }
         else if (rdo_doubleDeclining.isSelected()) {
             // use double declining method
-            assetDDL = new AssetDDL(assetName, assetCost, salvageValue, lifeOfItem);
-            if(!assetDDL.getErrorMessage().isEmpty()) {
-                statusMessageLabel.setText(assetDDL.getErrorMessage());
-                return;
-            }
-            tableValues = new String[assetDDL.getLifeOfItem()][4];
+            asset = new AssetDDL(assetName, assetCost, salvageValue, lifeOfItem);
         } else {
             statusMessageLabel.setText("Unknown depreciation type.");
+            return;
+        }
+        
+        
+        if(!asset.getErrorMessage().isEmpty()) {
+            statusMessageLabel.setText(asset.getErrorMessage());
             return;
         }
         
@@ -475,33 +465,25 @@ public class DepPolyView extends FrameView {
         
         // Schedule column names
         String[] columnNames = {"Year", "Beginning Balance", "Annual Depreciation", "Ending Balance"};
+        String[][] tableValues; // = new String[asset.getLifeOfItem()][4];
+        tableValues = new String[asset.getLifeOfItem()][4];
         
         DefaultTableModel model = new DefaultTableModel(tableValues, columnNames);
         tbl_schedule.setModel(model);
+        DefaultTableCellRenderer scheduleTablelRenderer = (DefaultTableCellRenderer) tbl_schedule.getDefaultRenderer(Object.class);
+        scheduleTablelRenderer.setHorizontalAlignment(JLabel.RIGHT);
+        tbl_schedule.setDefaultRenderer(Object.class, scheduleTablelRenderer);
         
         NumberFormat currency = NumberFormat.getCurrencyInstance();
         for(int year = 1; year <= lifeOfItem; year++) {
             tbl_schedule.setValueAt(year, year - 1, 0);
-            if(rdo_straightLine.isSelected()) {
-                
-                tbl_schedule.setValueAt(currency.format(assetSL.getBeginningBalance(year)), year - 1, 1);
-                tbl_schedule.setValueAt(currency.format(assetSL.getAnnualDepreciation()), year - 1, 2);
-                tbl_schedule.setValueAt(currency.format(assetSL.getEndingBalance(year)), year - 1, 3); 
-            } 
-            else if (rdo_OHDL.isSelected()) {
-                tbl_schedule.setValueAt(currency.format(assetOHDL.getBeginningBalance(year)), year - 1, 1);
-                tbl_schedule.setValueAt(currency.format(assetOHDL.getAnnualDepreciation(year)), year -1, 2);
-                tbl_schedule.setValueAt(currency.format(assetOHDL.getEndingBalance(year)), year - 1, 3);
-                
-            }
-            else if (rdo_doubleDeclining.isSelected()) {
-                tbl_schedule.setValueAt(currency.format(assetDDL.getBeginningBalance(year)), year - 1, 1);
-                tbl_schedule.setValueAt(currency.format(assetDDL.getAnnualDepreciation(year)), year - 1, 2);
-                tbl_schedule.setValueAt(currency.format(assetDDL.getEndingBalance(year)), year - 1, 3);
-            }
+            tbl_schedule.setValueAt(currency.format(asset.getBeginningBalance(year)), year - 1, 1);
+            tbl_schedule.setValueAt(currency.format(asset.getAnnualDepreciation(year)), year - 1, 2);
+            tbl_schedule.setValueAt(currency.format(asset.getEndingBalance(year)), year - 1, 3); 
         }
     }//GEN-LAST:event_btn_calculateActionPerformed
 
+    
     private void btn_clearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_clearActionPerformed
         
         statusMessageLabel.setText("");
@@ -515,6 +497,7 @@ public class DepPolyView extends FrameView {
         txt_assetName.requestFocusInWindow();
     }//GEN-LAST:event_btn_clearActionPerformed
 
+    
     private void jMenuSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuSaveActionPerformed
         
         statusMessageLabel.setText("");
@@ -530,13 +513,10 @@ public class DepPolyView extends FrameView {
             statusMessageLabel.setText("Save canceled.");            
         } else {
             String path = f.getSelectedFile().getAbsolutePath();
-            statusMessageLabel.setText(assetSL.setSave(path));
-        }
-        
+            statusMessageLabel.setText(asset.setSave(path));
+        }       
         
     }//GEN-LAST:event_jMenuSaveActionPerformed
-
-
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

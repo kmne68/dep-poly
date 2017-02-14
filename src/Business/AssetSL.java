@@ -59,7 +59,8 @@ public class AssetSL extends Asset {
         }
     } // end build
 
-    public double getAnnualDepreciation() {
+    
+    public double getAnnualDepreciation(int year) {
 
         if (!this.built) {
             if (isValid()) {
@@ -72,7 +73,8 @@ public class AssetSL extends Asset {
 
         return this.annualDepreciation;
     } // getAnnualDepreciation()
-
+    
+    
     public double getBeginningBalance(int year) {
 
         if (!this.built) {
