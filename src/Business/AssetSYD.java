@@ -41,6 +41,57 @@ abstract public class AssetSYD extends Asset {
             this.endingBalance[i] = Math.random() * 100.0;
             this.annualRate[i] = Math.random() * 100.0;
         }
+        this.built = true;
     }
     
+    
+    @Override
+    public double getBeginningBalance(int year) {
+        
+        if(!this.built) {
+            build();
+            if(!this.built) {
+                return -1;
+            }
+        }
+        return this.beginningBalance[year - 1];
+    }
+    
+    
+    @Override
+    public double getAnnualDepreciation(int year) {
+        
+        if(!this.built) {
+            build();
+            if(!this.built) {
+                return -1;
+            }
+        }
+        return this.annualDepreciation[year - 1];
+    }
+    
+    
+    
+    @Override
+    public double getEndingBalance(int year) {
+        if(!this.built) {
+            build();
+            if(!this.built) {
+                return -1;
+            }
+        }
+        return this.endingBalance[year - 1];
+    }
+    
+    
+    public double getAnnualRate(int year) {
+        
+        if(!this.built) {
+            build();
+            if(!this.built) {
+                return -1;
+            }
+        }
+        return this.annualRate[year - 1];
+    }
 }
