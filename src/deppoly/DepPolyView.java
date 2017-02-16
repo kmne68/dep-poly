@@ -409,6 +409,11 @@ public class DepPolyView extends FrameView {
      */
     private void btn_calculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_calculateActionPerformed
         
+        NumberFormat currency = NumberFormat.getCurrencyInstance();
+        NumberFormat percent = NumberFormat.getPercentInstance();
+        percent.setMaximumFractionDigits(3);
+        percent.setMinimumFractionDigits(3);
+        
         String assetName = txt_assetName.getText();
     //    String method = ""; // local method to select calculation method
         
@@ -474,7 +479,7 @@ public class DepPolyView extends FrameView {
         scheduleTablelRenderer.setHorizontalAlignment(JLabel.RIGHT);
         tbl_schedule.setDefaultRenderer(Object.class, scheduleTablelRenderer);
         
-        NumberFormat currency = NumberFormat.getCurrencyInstance();
+  //      NumberFormat currency = NumberFormat.getCurrencyInstance();
         for(int year = 1; year <= lifeOfItem; year++) {
             tbl_schedule.setValueAt(year, year - 1, 0);
             tbl_schedule.setValueAt(currency.format(asset.getBeginningBalance(year)), year - 1, 1);
