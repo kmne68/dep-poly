@@ -8,6 +8,7 @@ import Business.Asset;
 import Business.AssetDDL;
 import Business.AssetOHDL;
 import Business.AssetSL;
+import Business.AssetSYD;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;
 import org.jdesktop.application.SingleFrameApplication;
@@ -143,6 +144,7 @@ public class DepPolyView extends FrameView {
         pnl_schedule = new javax.swing.JScrollPane();
         tbl_schedule = new javax.swing.JTable();
         rdo_OHDL = new javax.swing.JRadioButton();
+        rdo_sumYearsDigits = new javax.swing.JRadioButton();
         menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
@@ -239,6 +241,10 @@ public class DepPolyView extends FrameView {
         rdo_OHDL.setText(resourceMap.getString("rdo_OHDL.text")); // NOI18N
         rdo_OHDL.setName("rdo_OHDL"); // NOI18N
 
+        methodGroup.add(rdo_sumYearsDigits);
+        rdo_sumYearsDigits.setText(resourceMap.getString("rdo_sumYearsDigits.text")); // NOI18N
+        rdo_sumYearsDigits.setName("rdo_sumYearsDigits"); // NOI18N
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -276,24 +282,24 @@ public class DepPolyView extends FrameView {
                                                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                     .addComponent(btn_calculate)
                                                     .addComponent(rdo_doubleDeclining))
-                                                .addGap(133, 133, 133)))
+                                                .addGap(40, 40, 40)
+                                                .addComponent(rdo_sumYearsDigits)))
                                         .addGap(18, 18, Short.MAX_VALUE)
                                         .addComponent(btn_clear))
                                     .addGroup(mainPanelLayout.createSequentialGroup()
-                                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                                .addGap(66, 66, 66)
-                                                .addComponent(lbl_salvageValue)
-                                                .addGap(66, 66, 66)
-                                                .addComponent(lbl_life))
-                                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                                .addGap(23, 23, 23)
-                                                .addComponent(lbl_selectMethod)))
-                                        .addGap(0, 132, Short.MAX_VALUE)))))
+                                        .addGap(66, 66, 66)
+                                        .addComponent(lbl_salvageValue)
+                                        .addGap(66, 66, 66)
+                                        .addComponent(lbl_life)
+                                        .addGap(0, 150, Short.MAX_VALUE)))))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(pnl_schedule, javax.swing.GroupLayout.PREFERRED_SIZE, 631, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(22, Short.MAX_VALUE))))
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGap(163, 163, 163)
+                .addComponent(lbl_selectMethod)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -311,13 +317,14 @@ public class DepPolyView extends FrameView {
                     .addComponent(txt_salvageValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_life, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_clear))
-                .addGap(49, 49, 49)
+                .addGap(47, 47, 47)
                 .addComponent(lbl_selectMethod)
-                .addGap(44, 44, 44)
+                .addGap(46, 46, 46)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdo_straightLine)
                     .addComponent(rdo_OHDL)
-                    .addComponent(rdo_doubleDeclining))
+                    .addComponent(rdo_doubleDeclining)
+                    .addComponent(rdo_sumYearsDigits))
                 .addGap(18, 18, 18)
                 .addComponent(btn_calculate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -455,6 +462,9 @@ public class DepPolyView extends FrameView {
         else if (rdo_doubleDeclining.isSelected()) {
             // use double declining method
             asset = new AssetDDL(assetName, assetCost, salvageValue, lifeOfItem);
+        }
+        else if (rdo_sumYearsDigits.isSelected()) {
+            asset = new AssetSYD(assetName, assetCost, salvageValue, lifeOfItem) {};
         } else {
             statusMessageLabel.setText("Unknown depreciation type.");
             return;
@@ -469,9 +479,16 @@ public class DepPolyView extends FrameView {
         // asset = new Asset(assetName, assetCost, salvageValue, lifeOfItem);
         
         // Schedule column names
-        String[] columnNames = {"Year", "Beginning Balance", "Annual Depreciation", "Ending Balance"};
-        String[][] tableValues; // = new String[asset.getLifeOfItem()][4];
-        tableValues = new String[asset.getLifeOfItem()][4];
+        String[][] tableValues;
+        String[] columnNames;
+        
+        if(rdo_sumYearsDigits.isSelected()) {
+            columnNames = new String[] {"Year", "Beginning Balance", "Annual Depreciation", "Ending Balance", "Annual Rate"};
+            tableValues = new String[asset.getLifeOfItem()][5];
+        } else {
+            columnNames = new String[] {"Year", "Beginning Balance", "Annual Depreciation", "Ending Balance"};
+            tableValues = new String[asset.getLifeOfItem()][4];
+        }
         
         DefaultTableModel model = new DefaultTableModel(tableValues, columnNames);
         tbl_schedule.setModel(model);
@@ -480,11 +497,15 @@ public class DepPolyView extends FrameView {
         tbl_schedule.setDefaultRenderer(Object.class, scheduleTablelRenderer);
         
   //      NumberFormat currency = NumberFormat.getCurrencyInstance();
-        for(int year = 1; year <= lifeOfItem; year++) {
+        for(int year = 1; year <= asset.getLifeOfItem(); year++) {
             tbl_schedule.setValueAt(year, year - 1, 0);
             tbl_schedule.setValueAt(currency.format(asset.getBeginningBalance(year)), year - 1, 1);
             tbl_schedule.setValueAt(currency.format(asset.getAnnualDepreciation(year)), year - 1, 2);
             tbl_schedule.setValueAt(currency.format(asset.getEndingBalance(year)), year - 1, 3); 
+            if(asset instanceof AssetSYD) {
+                AssetSYD asyd = (AssetSYD) asset;   // downcasted
+                tbl_schedule.setValueAt(percent.format(asyd.getAnnualRate(year)), year - 1, 4);
+            }
         }
     }//GEN-LAST:event_btn_calculateActionPerformed
 
@@ -541,6 +562,7 @@ public class DepPolyView extends FrameView {
     private javax.swing.JRadioButton rdo_OHDL;
     private javax.swing.JRadioButton rdo_doubleDeclining;
     private javax.swing.JRadioButton rdo_straightLine;
+    private javax.swing.JRadioButton rdo_sumYearsDigits;
     private javax.swing.JLabel statusAnimationLabel;
     private javax.swing.JLabel statusMessageLabel;
     private javax.swing.JPanel statusPanel;

@@ -54,7 +54,9 @@ abstract public class AssetSYD extends Asset {
                 this.annualRate[year] = (double)remainingLife / (double)syd;
                 this.annualDepreciation[year] = depreciationTotal * this.annualRate[year];
                 this.endingBalance[year] = this.beginningBalance[year] - this.annualDepreciation[year];
-             }
+            
+                this.built = true;
+            }
         } catch (Exception e) {
             super.setErrorMessage("SYD build failed" + e.getMessage());
             this.built = false;
